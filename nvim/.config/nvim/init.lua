@@ -245,6 +245,15 @@ do
     group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
     callback = function() vim.hl.on_yank() end,
   })
+
+  -- Chan<C-/><C-/>ge commenting to vs-code keymap
+  -- Normal Mode: Toggle current line
+  vim.keymap.set("n", "<C-_>", "gcc", { remap = true, silent = true })
+
+-- Visual Mode: Toggle selected lines
+  vim.keymap.set("v", "<C-_>", "gc", { remap = true, silent = true })
+
+
 end
 
 -- ============================================================
