@@ -98,6 +98,13 @@ do
   vim.g.mapleader = ' '
   vim.g.maplocalleader = ' '
 
+  -- Paste over selection without losing yank
+  vim.keymap.set("x", "p", [["_dP]])
+
+  -- Don't let x overwrite the yank register
+  vim.keymap.set({ "n", "x" }, "x", '"_x')
+  vim.keymap.set({ "n", "x" }, "X", '"_X')
+
   -- Set to true if you have a Nerd Font installed and selected in the terminal
   vim.g.have_nerd_font = true
 
@@ -126,6 +133,11 @@ do
 
   -- Enable break indent
   vim.o.breakindent = true
+
+  vim.o.smartindent = true
+  vim.o.expandtab = true
+  vim.o.shiftwidth = 2
+  vim.o.tabstop = 2
 
   -- Enable undo/redo changes even after closing and reopening a file
   vim.o.undofile = true
@@ -253,6 +265,27 @@ do
 -- Visual Mode: Toggle selected lines
   vim.keymap.set("v", "<C-_>", "gc", { remap = true, silent = true })
 
+  -- Navigate buffers
+  vim.keymap.set("n", "<S-l>", ":bnext<CR>", { remap = true, silent = true })
+  vim.keymap.set("n", "<S-h>", ":bprevious<CR>", { remap = true, silent = true })
+
+  -- Insert --
+
+  -- Visual --
+  -- Stay in indent mode
+  vim.keymap.set("v", "<", "<gv", { remap = true, silent = true })
+  vim.keymap.set("v", ">", ">gv", { remap = true, silent = true })
+
+  -- Move text up and down
+  vim.keymap.set("v", "<A-j>", ":m .+1<CR>==", { remap = true, silent = true })
+  vim.keymap.set("v", "p", '"_dP', { remap = true, silent = true })
+  vim.keymap.set("v", "<A-k>", ":m .-2<CR>==", { remap = true, silent = true })
+
+  -- Visual Block --
+  vim.keymap.set("x", "J", ":move '>+1<CR>gv-gv", { remap = true, silent = true })
+  vim.keymap.set("x", "K", ":move '<-2<CR>gv-gv", { remap = true, silent = true })
+  vim.keymap.set("x", "<A-j>", ":move '>+1<CR>gv-gv", { remap = true, silent = true })
+  vim.keymap.set("x", "<A-k>", ":move '<-2<CR>gv-gv", { remap = true, silent = true })
 
 end
 
@@ -619,6 +652,22 @@ do
   -- and elegantly composed help section, `:help lsp-vs-treesitter`
 
   -- Useful status updates for LSP.
+
+  if vim.g.have_nerd_font then
+    local severity = vim.diagnostic.severity
+
+    vim.diagnostic.config({
+      signs = {
+        text = {
+          [severity.ERROR] = " ",
+          [severity.WARN] = " ",
+          [severity.HINT] = "󰠠 ",
+          [severity.INFO] = " ",
+        },
+      },
+    })
+  end
+
   vim.pack.add { gh 'j-hui/fidget.nvim' }
   require('fidget').setup {}
 
@@ -650,6 +699,7 @@ do
       -- WARN: This is not Goto Definition, this is Goto Declaration.
       --  For example, in C this would take you to the header.
       map('grD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+
 
       -- The following two autocommands are used to highlight references of the
       -- word under your cursor when your cursor rests there for a little while.
@@ -827,8 +877,8 @@ do
   --    See the README about individual language/framework/plugin snippets:
   --    https://github.com/rafamadriz/friendly-snippets
   --
-  -- vim.pack.add { gh 'rafamadriz/friendly-snippets' }
-  -- require('luasnip.loaders.from_vscode').lazy_load()
+  vim.pack.add { gh 'rafamadriz/friendly-snippets' }
+  require('luasnip.loaders.from_vscode').lazy_load()
 
   -- [[ Autocomplete Engine ]]
   vim.pack.add { { src = gh 'saghen/blink.cmp', version = vim.version.range '1.*' } }
@@ -855,7 +905,7 @@ do
       -- <c-k>: Toggle signature help
       --
       -- See `:help blink-cmp-config-keymap` for defining your own keymap
-      preset = 'default',
+      preset = 'enter',
 
       -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
       --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -886,7 +936,7 @@ do
     -- the rust implementation via `'prefer_rust_with_warning'`
     --
     -- See `:help blink-cmp-config-fuzzy` for more information
-    fuzzy = { implementation = 'lua' },
+    fuzzy = { implementation = 'prefer_rust_with_warning' },
 
     -- Shows a signature help window while you type arguments for a function
     signature = { enabled = true },
